@@ -8,7 +8,6 @@ import (
 	// "os"
 	
 	"github.com/gorilla/websocket"
-	"github.com/thoas/go-funk"
 )
 
 type M map[string]interface{}
@@ -43,13 +42,6 @@ type Room struct {
 }
 
 func main() {
-	// room := &Room{Name: "RoomName"}
-	// connection1 := &WebSocketConnection{ws1}
-	// connection2 := &WebSocketConnection{ws2}
-	// room.Connections = append(room.Connections, connection1, connection2)
-	// for _, conn := range room.Connections {
-	// 	// Access each connection in the room
-	// }
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		currentGorillaConn, err := websocket.Upgrade(w, r, w.Header(), 1024, 1024)
@@ -136,10 +128,13 @@ func sendDirectMessage(sender *WebSocketConnection, recipient, message string) {
 }
 
 func ejectConnection(currentConn *WebSocketConnection) {
-    filtered := funk.Filter(connections, func(each *WebSocketConnection) bool {
-        return each != currentConn
-    }).([]*WebSocketConnection)
-    connections = filtered
+	var filtered []*WebSocketConnection
+	for _, conn := range connections {
+		if conn != currentConn {
+			filtered = append(filtered, conn)
+		}
+	}
+	connections = filtered
 }
 
 func broadcastMessage(currentConn *WebSocketConnection, kind, message string) {
